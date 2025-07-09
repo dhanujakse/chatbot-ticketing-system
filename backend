@@ -1,0 +1,28 @@
+from flask import Flask, request, jsonify
+
+app = Flask(__name__)
+
+@app.route('/webhook', methods=['POST'])
+def webhook():
+    data = request.get_json()
+
+    # Extract user details from the received data
+    try:
+        params = data['queryResult']['parameters']
+        name = params.get('name', '')
+        date = params.get('date', '')
+        ticket_type = params.get('ticket_type', '')
+
+        # Logic to confirm booking
+        if name and date and ticket_type:
+            fulfillment_text = f"✅ Hi {name}! Your {ticket_type} ticket has been booked for {date}. Enjoy your visit!"
+        else:
+            fulfillment_text = "❌ Booking failed. Please provide all the required details."
+
+        return jsonify({'fulfillmentText': fulfillment_text})
+
+    except Exception as e:
+        return jsonify({'fulfillmentText': f"⚠️ Error: {str(e)}"})
+
+if __name__ == '__main__':
+    app.run(debug=True)
